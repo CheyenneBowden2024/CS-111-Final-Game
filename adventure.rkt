@@ -264,9 +264,39 @@
 ;;; ADD YOUR TYPES HERE!
 ;;;
 
+(define-struct (bug prop)
+  (species))
+
+(define (new-bug adjectives location species)
+  (local [(define bug
+            (make-bug (string->words adjectives)
+                            '()
+                            location
+                            species))]
+    (begin (initialize-thing! bug)
+           bug)))
 
 
+;;; PESITICIDE
+(define-struct (pesticide prop)
+  (brand)
 
+  #:methods
+  (define (use thing)
+   (if (is-a? thing "Talstar pro")
+      (begin (destroy! thing)
+             ;; it also needs to destroy the bug in the room. how?
+             (display-line "The bug is now dead!"))
+      (display-line "This pesticide doesn't work"))))
+
+(define (new-pesticide adjectives location brand)
+  (local [(define pesticide
+            (make-pesticide (string->words adjectives)
+                            '()
+                            location
+                            brand))]
+    (begin (initialize-thing! pesticide)
+           pesticide)))
 
 
 
@@ -341,6 +371,7 @@
 ;;; ADD YOUR COMMANDS HERE!
 ;;;
 
+(define-user-command (pesticide thing) "kills the bug")
 ;;;
 ;;; THE GAME WORLD - FILL ME IN
 ;;;
@@ -354,7 +385,7 @@
            ;; Add join commands to connect your rooms with doors
 
            ;; Add code here to add things to your rooms
-           
+           (new-prop "Talstar pro" '() starting-room) ;; why do we have to have the empty list?
            (check-containers!)
            (void))))
 
