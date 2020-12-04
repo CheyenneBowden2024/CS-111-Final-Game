@@ -5,8 +5,6 @@
 (require "macros.rkt")
 (require "utilities.rkt")
 
-; TESTING AN EDIT zoom hffngchgfjggv
-
 ;;;
 ;;; OBJECT
 ;;; Base type for all in-game objects
@@ -258,7 +256,7 @@
   (local [(define words (string->words description))
           (define noun (last words))
           (define adjectives (drop-right words 1))
-          (define prop (make-prop adjectives '() location noun examine-text))]
+          (define prop (make-prop (adjectives '() location noun examine-text)))]
     (begin (initialize-thing! prop)
            prop)))
 
@@ -266,9 +264,44 @@
 ;;; ADD YOUR TYPES HERE!
 ;;;
 
+(define-struct (bug thing)
+  (species
+   size)
+
+  ;;#: methods
+  )
+
+(define (new-bug adjectives location species size)
+  (local [(define bug
+            (make-bug (string->words adjectives)
+                            '()
+                            location
+                            species
+                            size))]
+    (begin (initialize-thing! bug)
+           bug)))
 
 
+;;; PESITICIDE
+(define-struct (pesticide thing)
+  (brand)
 
+  #:methods
+  (define (use thing)
+   (if (string=? (pesticide-brand thing) "Talstar pro")
+      (begin (destroy! thing)
+             ;; it also needs to destroy the bug in the room. how?
+             (display-line "The bug is now dead!"))
+      (display-line "This pesticide doesn't work"))))
+
+(define (new-pesticide adjectives location brand)
+  (local [(define pesticide
+            (make-pesticide (string->words adjectives)
+                            '()
+                            location
+                            brand))]
+    (begin (initialize-thing! pesticide)
+           pesticide)))
 
 
 
@@ -343,6 +376,7 @@
 ;;; ADD YOUR COMMANDS HERE!
 ;;;
 
+(define-user-command (pesticide thing) "kills the bug")
 ;;;
 ;;; THE GAME WORLD - FILL ME IN
 ;;;
@@ -351,13 +385,16 @@
 ;; Recreate the player object and all the rooms and things.
 (define (start-game)
   ;; Fill this in with the rooms you want
-  (local [(define starting-room (new-room ""))]
+  (local [(define starting-room (new-room "bright"))
+          (define room2 (new-room "dark"))]
     (begin (set! me (new-person "" starting-room))
            ;; Add join commands to connect your rooms with doors
-
+           (join! starting-room "glass"
+                  room2 "plastic")
            ;; Add code here to add things to your rooms
-           
-           (check-containers!)
+           (new-pesticide "white" starting-room "Talstar pro")
+           (new-pesticide "yellow" starting-room "Raid")
+           (new-bug "red" starting-room "ladybug" "small")
            (void))))
 
 ;;;
