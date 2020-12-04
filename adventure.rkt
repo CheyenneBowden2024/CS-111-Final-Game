@@ -256,7 +256,7 @@
   (local [(define words (string->words description))
           (define noun (last words))
           (define adjectives (drop-right words 1))
-          (define prop (make-prop adjectives '() location noun examine-text))]
+          (define prop (make-prop (adjectives '() location noun examine-text)))]
     (begin (initialize-thing! prop)
            prop)))
 
@@ -264,26 +264,31 @@
 ;;; ADD YOUR TYPES HERE!
 ;;;
 
-(define-struct (bug prop)
-  (species))
+(define-struct (bug thing)
+  (species
+   size)
 
-(define (new-bug adjectives location species)
+  ;;#: methods
+  )
+
+(define (new-bug adjectives location species size)
   (local [(define bug
             (make-bug (string->words adjectives)
                             '()
                             location
-                            species))]
+                            species
+                            size))]
     (begin (initialize-thing! bug)
            bug)))
 
 
 ;;; PESITICIDE
-(define-struct (pesticide prop)
+(define-struct (pesticide thing)
   (brand)
 
   #:methods
   (define (use thing)
-   (if (is-a? thing "Talstar pro")
+   (if (string=? (pesticide-brand thing) "Talstar pro")
       (begin (destroy! thing)
              ;; it also needs to destroy the bug in the room. how?
              (display-line "The bug is now dead!"))
@@ -380,13 +385,16 @@
 ;; Recreate the player object and all the rooms and things.
 (define (start-game)
   ;; Fill this in with the rooms you want
-  (local [(define starting-room (new-room ""))]
+  (local [(define starting-room (new-room "bright"))
+          (define room2 (new-room "dark"))]
     (begin (set! me (new-person "" starting-room))
            ;; Add join commands to connect your rooms with doors
-
+           (join! starting-room "glass"
+                  room2 "plastic")
            ;; Add code here to add things to your rooms
-           (new-prop "Talstar pro" '() starting-room) ;; why do we have to have the empty list?
-           (check-containers!)
+           (new-pesticide "white" starting-room "Talstar pro")
+           (new-pesticide "yellow" starting-room "Raid")
+           (new-bug "red" starting-room "ladybug" "small")
            (void))))
 
 ;;;
