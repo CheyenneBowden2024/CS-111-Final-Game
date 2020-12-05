@@ -135,6 +135,8 @@
   (make-room (string->words adjectives)
              '()))
 
+
+
 ;;;
 ;;; THING
 ;;; Base type for all physical objects that can be inside other objects such as rooms
@@ -268,9 +270,29 @@
   (species
    size)
 
-  ;;#: methods
-  )
+  #:methods
+  (define (observe bug)
+    (if (string=? (bug-species bug) "ladybug")
+        (display-line "It is a friedly bug, let it live")
+        (display-line "KILL THE PEST")))
 
+  (define (catch bug)
+    (if (string=? (bug-size bug) "big")
+        (error "It doesn't fit in your pocket")
+        (begin (display-line "The bug says 'ouch'")
+               (move! bug me))))
+
+;  (define (mesmerize bug)
+;    (if (string=? (description me) "dark")
+;        (set! bug-species "ladybug")
+;        (error "There's too much light for the mesmerization")))
+
+  (define (change bug)
+    (begin (destroy! bug)
+           (initialize-thing! bug)))
+  )
+         
+        
 (define (new-bug adjectives location species size)
   (local [(define bug
             (make-bug (string->words adjectives)
@@ -287,13 +309,21 @@
   (brand)
 
   #:methods
-  (define (use thing)
-   (if (string=? (pesticide-brand thing) "Talstar pro")
-      (begin (destroy! thing)
-             ;; it also needs to destroy the bug in the room. how?
-             (display-line "The bug is now dead!"))
-      (display-line "This pesticide doesn't work"))))
+  (define (use pesticide)
+   (if (string=? (pesticide-brand pesticide) "Talstar pro")
+      (begin (destroy! pesticide)
+             (display-line "The bugs are now dead!"))
+      (error "This pesticide doesn't work")))
 
+  (define (throw pesticide)
+    (if (string=? (pesticide-brand pesticide) "bloom buddy")
+        (error "This pesticide is too light to kill the weta")
+        (begin (destroy! (the black bug))
+               (display-line "The weta gets crushed tragically and vanishes")))))
+
+
+
+  
 (define (new-pesticide adjectives location brand)
   (local [(define pesticide
             (make-pesticide (string->words adjectives)
@@ -375,8 +405,12 @@
 ;;;
 ;;; ADD YOUR COMMANDS HERE!
 ;;;
+(define-user-command (observe bug) "sees if it is a pest")
 
-(define-user-command (pesticide thing) "kills the bug")
+(define-user-command (catch bug) "puts the bug in the inventory if it's not big")
+
+(define-user-command (use pesticide) "kills the bug")
+
 ;;;
 ;;; THE GAME WORLD - FILL ME IN
 ;;;
@@ -394,7 +428,10 @@
            ;; Add code here to add things to your rooms
            (new-pesticide "white" starting-room "Talstar pro")
            (new-pesticide "yellow" starting-room "Raid")
+           (new-pesticide "green" starting-room "bloom buddy")
            (new-bug "red" starting-room "ladybug" "small")
+           (new-bug "brown" room2 "grasshopper" "medium")
+           (new-bug "black" starting-room "weta" "big")
            (void))))
 
 ;;;
