@@ -1,6 +1,7 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
 #reader(lib "htdp-advanced-reader.ss" "lang")((modname adventure) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #t #t none #f () #f)))
+
 (require "adventure-define-struct.rkt")
 (require "macros.rkt")
 (require "utilities.rkt")
@@ -204,6 +205,15 @@
            (initialize-thing! r2->r1)
            (void))))
 
+(define (joinn! room2 adjectives2 room3 adjectives3)
+  (local [(define r2->r3 (make-door (string->words adjectives2)
+                                    '() room2 room3))
+          (define r3->r2 (make-door (string->words adjectives3)
+                                    '() room3 room2))]
+    (begin (initialize-thing! r2->r3)
+           (initialize-thing! r3->r2)
+           (void))))
+
 ;;;
 ;;; PERSON
 ;;; A character in the game.  The player character is a person.
@@ -271,6 +281,7 @@
    size
    roomloc)
 
+
   #:methods
   (define (observe bug)
     (if (string=? (bug-species bug) "ladybug")
@@ -289,13 +300,14 @@
         (error "There's too much light for the mesmerization"))))
          
         
-(define (new-bug adjectives location species size)
+(define (new-bug adjectives location species size roomloc)
   (local [(define bug
             (make-bug (string->words adjectives)
                             '()
                             location
                             species
-                            size))]
+                            size
+                            roomloc))]
     (begin (initialize-thing! bug)
            bug)))
 
@@ -311,12 +323,12 @@
              (display-line "The bugs are now dead!"))
       (error "This pesticide doesn't work")))
 
+
   (define (throw pesticide)
     (if (string=? (pesticide-brand pesticide) "bloom buddy")
         (error "This pesticide is too light to kill the weta")
         (begin (destroy! (the black bug))
                (display-line "The weta gets crushed tragically and vanishes")))))
-
 
 
   
@@ -328,6 +340,99 @@
                             brand))]
     (begin (initialize-thing! pesticide)
            pesticide)))
+           
+;;;; SEEDS
+
+(define-struct (seed thing)
+  (species size))
+
+(define (new-seed adjectives location species size)
+  (local [(define seed
+            (make-seed (string->words adjectives)
+                            '()
+                            location
+                            species
+                            size))]
+    (begin (initialize-thing! seed)
+           seed)))
+
+        
+
+
+;;;; PLANTS
+(define-struct (plant seed)
+  ())
+
+(define (new-plant adjectives location species size)
+  (local [(define plant
+            (make-plant (string->words adjectives)
+                            '()
+                            location
+                            species
+                            size))]
+    (begin (initialize-thing! plant)
+           plant)))
+
+;;; WATER
+
+(define-struct (water thing)
+  (source)
+
+  #:methods
+
+  (define (spray thing)
+    (if (string=? (water-source thing) "Fresh water")
+        (display-line "The plant loves this water and is now blossoming!")
+        (display-line "You are dehydrating the plant, give it fresh water!")))
+
+  (define (spray-seed-w/ thing)
+    (if (string=? (water-source thing) "Cloudy water")
+        (display-line "This isn't helping the plant grow")
+        (begin (destroy! (the seed))
+               (add! (new-plant "green" (here) "Cactus" "Big")
+                     (display-line "A new plant has bud"))))))
+                        
+(define (new-water adjectives location source)
+  (local [(define water
+            (make-water (string->words adjectives)
+                            '()
+                            location
+                            source))]
+    (begin (initialize-thing! water)
+           water)))
+
+
+;;; FERTILIZER
+
+(define-struct (fertilizer thing)
+  (chemical make)
+
+  #:methods
+ (define (check-out thing)
+    (if (string=? (fertilizer-chemical thing) "Organic")
+            (display-line "This fertilizer is organic.")
+            (display-line "This fertilzer is inorganic."))) 
+
+  (define (spread thing)
+    (if (string=? (fertilizer-chemical thing) "Organic")
+        (if (string=? (fertilizer-make thing) "Compost")
+            (display-line "This fertilizer is nourishing the plant very well!")
+            (display-line "This fertilzer isn't the best choice for the plant."))
+        ((begin
+    (destroy! (the plant))
+    (error "This killed the plant!"))))))
+    
+
+
+(define (new-fertilizer adjectives location chemical make)
+  (local [(define fertilizer
+            (make-fertilizer (string->words adjectives)
+                            '()
+                            location
+                            chemical
+                            make))]
+    (begin (initialize-thing! fertilizer)
+           fertilizer)))
 
 
 
@@ -416,11 +521,17 @@
 (define (start-game)
   ;; Fill this in with the rooms you want
   (local [(define starting-room (new-room "bright"))
-          (define room2 (new-room "dark"))]
+
+          (define room2 (new-room "dark"))
+          (define room3 (new-room "snowy"))]
+
     (begin (set! me (new-person "" starting-room))
            ;; Add join commands to connect your rooms with doors
            (join! starting-room "glass"
-                  room2 "plastic")
+                  room2 "glass")
+
+           (joinn! room2 "wood"
+                   room3 "wood")
            ;; Add code here to add things to your rooms
            (new-pesticide "white" starting-room "Talstar pro")
            (new-pesticide "yellow" starting-room "Raid")
@@ -428,6 +539,15 @@
            (new-bug "red" starting-room "ladybug" "small" "bright")
            (new-bug "brown" room2 "grasshopper" "medium" "dark")
            (new-bug "black" starting-room "weta" "big" "bright")
+           (new-water "clear" starting-room "Fresh water")
+           (new-water "cloudy" starting-room "Salt water")
+           (new-fertilizer "blue" starting-room "Inorganic" "Synthetic")
+           (new-fertilizer "brown" starting-room "Organic" "Compost")
+           (new-fertilizer "red" starting-room "Organic" "Blood meal")
+           (new-fertilizer "tan" starting-room "Organic" "Bone meal")
+           (new-seed "green" starting-room "Cactus" "Big")
+
+
            (void))))
 
 ;;;
