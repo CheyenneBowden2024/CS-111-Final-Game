@@ -203,6 +203,15 @@
     (begin (initialize-thing! r1->r2)
            (initialize-thing! r2->r1)
            (void))))
+           
+(define (joinn! room2 adjectives2 room3 adjectives3)
+  (local [(define r2->r3 (make-door (string->words adjectives2)
+                                    '() room2 room3))
+          (define r3->r2 (make-door (string->words adjectives3)
+                                    '() room3 room2))]
+    (begin (initialize-thing! r2->r3)
+           (initialize-thing! r3->r2)
+           (void))))
 
 ;;;
 ;;; PERSON
@@ -511,7 +520,8 @@
 (define (start-game)
   ;; Fill this in with the rooms you want
   (local [(define starting-room (new-room "bright"))
-          (define room2 (new-room "dark"))]
+          (define room2 (new-room "dark"))
+          (define room3 (new-room "light"))]]
     (begin (set! me (new-person "" starting-room))
            ;; Add join commands to connect your rooms with doors
            (join! starting-room "glass"
