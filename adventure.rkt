@@ -5,7 +5,7 @@
 (require "macros.rkt")
 (require "utilities.rkt")
 
-; TESTING AN EDIT
+; TESTING AN EDIT zoom hffngchgfjggv
 
 ;;;
 ;;; OBJECT
@@ -268,7 +268,80 @@
 
 
 
+(define-struct (pond thing)
+  (size
+   state)
+    
+  #:methods
+  ;; clean
+  (define (clean pond)
+    (if (string=? (pond-state pond) "infested")
+        (begin
+          (set-pond-state! pond "clean")
+          (display-line "YAY you cleaned the pond! Now all the creatures can swim freely!"))
+        (if (string=? (pond-state pond) "clean")
+            (display-line "this is aleady clean")
+            (display-line "you cant clean this")
+         
+            )))
+  ;;drink
+  (define (drink pond)
+    (if (string=? (pond-state pond) "infested")
+        (error "this pond is filthy. You should CLEAN it before you drink water from it")
+        (if (string=? (pond-state pond) "clean") 
+            (display "mmhm refreshing")
+            (display "you shouldnt drink that"))
+        )))
 
+(define (new-pond adjectives location size state)
+  (local [(define pond (make-pond (string->words adjectives)
+                                  '()
+                                  location
+                                  size
+                                  state))]
+
+    (begin (initialize-thing! pond)
+           pond)))
+
+(define-struct (bird thing)
+  (mood
+   type)
+    
+  #:methods
+  ;; hit
+  (define (hit bird)
+    (if (string=? (bird-type bird) "hummingbird")
+        (error "this is a nice hummingbird. Let it live ")
+        (if (string=? (bird-type bird) "Vulture")
+            (begin (destroy! bird)
+                   (display "Congrats, you killed the vulture"))
+            (if (string=? (bird-type bird) "parrot")
+                (display "the parrot says: 'OW! That hurt!' ")
+                (display "This is not something you can kill"))))
+    ))
+;;;talk
+(define (talk bird)
+  (if (string=? (bird-type bird) "hummingbird")
+      (display "the hummingbird: 'chirp chirp' ")
+      (if (string=? (bird-type bird) "parrot")
+          (display "the parrot says: 'hi here! squawk!' ")
+          (if (string=? (bird-type bird) "Vulture")
+          (display "this angry bird does not want to speak to you")
+          (display "this does not speak "))
+          )))
+      
+      
+      
+
+(define (new-bird adjectives location size type)
+  (local [(define bird (make-bird (string->words adjectives)
+                                  '()
+                                  location
+                                  size
+                                  type))]
+
+    (begin (initialize-thing! bird)
+           bird)))
 
 
 
@@ -342,7 +415,17 @@
 ;;;
 ;;; ADD YOUR COMMANDS HERE!
 ;;;
+(define-user-command (clean)
+  "cleans a pond")
 
+(define-user-command (drink)
+  "drinks from a pond")
+
+(define-user-command (hit)
+  "User smacks a bird")
+
+(define-user-command (talk)
+  "user talks to a bird")
 ;;;
 ;;; THE GAME WORLD - FILL ME IN
 ;;;
@@ -356,7 +439,12 @@
            ;; Add join commands to connect your rooms with doors
 
            ;; Add code here to add things to your rooms
-           
+
+           (new-pond "blue" starting-room "large" "clean")
+           (new-pond "green" starting-room "polluted" "infested")
+           (new-bird "orange" starting-room "kind" "hummingbird")
+           (new-bird "black" starting-room "angry" "Vulture")
+           (new-bird "yellow" starting-room "bubbly" "parrot")
            (check-containers!)
            (void))))
 
@@ -365,6 +453,13 @@
 ;;;
 
 
+;(clean(the green pond))
+;(drink (the green pond))
+;(hit(the black bird))
+;(talk(the yellow bird))
+;(talk(the orange bird))
+;(talk(the black bird))
+    
 
 
 
