@@ -427,12 +427,12 @@
 
   #:methods
  (define (check-out thing)
-    (if (string=? (fertilizer-chemical thing) "organic")
+    (if (string=? (fertilizer-chemical thing) "Organic")
             (display-line "This fertilizer is organic.")
             (display-line "This fertilzer is inorganic."))) 
 
   (define (spread thing)
-    (if (string=? (fertilizer-chemical thing) "organic")
+    (if (string=? (fertilizer-chemical thing) "Organic")
         (if (string=? (fertilizer-make thing) "Compost")
             (printf "This fertilizer is nourishing the ~A very well!\n"
                     (plant-species (the plant)))
@@ -499,14 +499,12 @@
   #:methods
   ;; hit
   (define (hit bird)
-    (if (string=? (bird-type bird) "hummingbird")
-        (error "this is a nice hummingbird. Let it live ")
-        (if (string=? (bird-type bird) "Vulture")
+    (if (string=? (bird-mood bird) "kind")
+        (error "this is a kind bird. Let it live ")
+        (if (string=? (bird-mood bird) "malicious")
             (begin (destroy! bird)
-                   (display "Congrats, you killed the vulture"))
-            (if (string=? (bird-type bird) "parrot")
-                (display "the parrot says: 'OW! That hurt!' ")
-                (display "This is not something you can kill"))))
+                   (display "Congrats, you killed the malicious vulture"))
+                (display "This is not something you can kill")))
     ))
 ;;;talk
 (define (talk bird)
@@ -718,8 +716,8 @@
            (new-pond "blue" room2"large" "clean")
            (new-pond "green" starting-room "polluted" "infested")
            (new-bird "orange" starting-room "kind" "hummingbird")
-           (new-bird "black" room2 "angry" "Vulture")
-           (new-bird "yellow" room3 "bubbly" "parrot")
+           (new-bird "black" room2 "malicious" "Vulture")
+           (new-bird "yellow" room3 "kind" "parrot")
            (new-tree "green" starting-room "Redwood" "Big")
            (void))))
 
