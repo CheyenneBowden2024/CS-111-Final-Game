@@ -5,8 +5,6 @@
 (require "macros.rkt")
 (require "utilities.rkt")
 
-; TESTING AN EDIT zoom
-
 ;;;
 ;;; OBJECT
 ;;; Base type for all in-game objects
