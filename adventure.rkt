@@ -521,7 +521,7 @@
   ;; Fill this in with the rooms you want
   (local [(define starting-room (new-room "bright"))
           (define room2 (new-room "dark"))
-          (define room3 (new-room "light"))]]
+          (define room3 (new-room "light"))]
     (begin (set! me (new-person "" starting-room))
            ;; Add join commands to connect your rooms with doors
            (join! starting-room "glass"
