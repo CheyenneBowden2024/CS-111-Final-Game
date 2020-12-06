@@ -282,14 +282,12 @@
         (begin (display-line "The bug says 'ouch'")
                (move! bug me))))
 
-;  (define (mesmerize bug)
-;    (if (string=? (description me) "dark")
-;        (set! bug-species "ladybug")
-;        (error "There's too much light for the mesmerization")))
+  (define (mesmerize bug)
+    (if (string=? (here) "a dark room")
+        (set! bug-species "ladybug")
+        (error "There's too much light for the mesmerization")))
 
-  (define (change bug)
-    (begin (destroy! bug)
-           (initialize-thing! bug)))
+
   )
          
         
