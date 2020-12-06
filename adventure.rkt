@@ -203,7 +203,7 @@
     (begin (initialize-thing! r1->r2)
            (initialize-thing! r2->r1)
            (void))))
-           
+
 (define (joinn! room2 adjectives2 room3 adjectives3)
   (local [(define r2->r3 (make-door (string->words adjectives2)
                                     '() room2 room3))
@@ -526,6 +526,8 @@
            ;; Add join commands to connect your rooms with doors
            (join! starting-room "glass"
                   room2 "plastic")
+           (joinn! room2 "wood"
+                   room3 "glass")
            ;; Add code here to add things to your rooms
            (new-pesticide "white" starting-room "Talstar pro")
            (new-pesticide "yellow" starting-room "Raid")
