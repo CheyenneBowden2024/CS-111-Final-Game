@@ -747,6 +747,10 @@
   (take (the blue fertilizer))
   (take (the clear water))
   (take (the cloudy water))
+  (clean(the green pond))
+  (drink (the green pond))
+  (talk(the orange bird))
+  
   (go (the glass door))
   (observe (the black bug))
   (throw (the green pesticide))
@@ -761,6 +765,9 @@
   (spray-seed-w/ (the clear water))
   (spray (the clear water))
   (spread (the brown fertilizer))
+  (talk(the black bird))
+  (hit(the black bird))
+  
   (go (the wood door))
   (observe (the white bug))
   (mesmerize (the white bug))
@@ -770,15 +777,11 @@
   (spray-seed-w/ (the clear water))
   (study-plant (the plant))
   (spray (the clear water))
-  (spread (the brown fertilizer)))
+  (spread (the brown fertilizer))
+  (talk(the yellow bird)))
 
 
-;(clean(the green pond))
-;(drink (the green pond))
-;(hit(the black bird))
-;(talk(the yellow bird))
-;(talk(the orange bird))
-;(talk(the black bird))
+
 
 
 
