@@ -286,18 +286,18 @@
   (define (observe bug)
     (if (string=? (bug-species bug) "ladybug")
         (display-line "It is a friedly bug, let it live")
-        (display-line "KILL THE PEST")))
+        (display-line "THAT'S A PEST")))
 
   (define (catch bug)
     (if (string=? (bug-size bug) "big")
-        (error "It doesn't fit in your pocket")
+        (display-line "It doesn't fit in your pocket")
         (begin (display-line "The bug says 'ouch'")
                (move! bug me))))
 
   (define (mesmerize bug)
     (if (string=? (bug-roomloc bug) "dark")
         (set-bug-species! bug "ladybug")
-        (error "There's too much light for the mesmerization"))))
+        (display-line "There's too much light for the mesmerization"))))
          
         
 (define (new-bug adjectives location species size roomloc)
@@ -320,13 +320,14 @@
   (define (use pesticide)
    (if (string=? (pesticide-brand pesticide) "Talstar pro")
       (begin (destroy! pesticide)
-             (display-line "The bugs are now dead!"))
-      (error "This pesticide doesn't work")))
+             (destroy! (the bug))
+             (display-line "The bug is now dead!"))
+      (display-line "This pesticide doesn't work")))
 
 
   (define (throw pesticide)
     (if (string=? (pesticide-brand pesticide) "bloom buddy")
-        (error "This pesticide is too light to kill the weta")
+        (display-line "This pesticide is too light to kill the weta")
         (begin (destroy! (the black bug))
                (display-line "The weta gets crushed tragically and vanishes")))))
 
@@ -579,11 +580,20 @@
 ;;;
 ;;; ADD YOUR COMMANDS HERE!
 ;;;
-(define-user-command (observe bug) "sees if it is a pest")
+(define-user-command (observe bug) 
+  "sees if it is a pest")
 
-(define-user-command (catch bug) "puts the bug in the inventory if it's not big")
+(define-user-command (catch bug) 
+  "puts the bug in the inventory if it's not big")
 
-(define-user-command (use pesticide) "kills the bug")
+(define-user-command (mesmerize bug) 
+  "change the bug to a ladybug in the dark room")
+
+(define-user-command (use pesticide) 
+  "kills the bug")
+
+(define-user-command (throw pesticide) 
+  "use any pesticide except bloom buddy to kill the black bug")
 
 (define-user-command (clean)
   "cleans a pond")
@@ -607,7 +617,6 @@
 (define (start-game)
   ;; Fill this in with the rooms you want
   (local [(define starting-room (new-room "bright"))
-
           (define room2 (new-room "dark"))
           (define room3 (new-room "snowy"))]
 
@@ -615,16 +624,19 @@
            ;; Add join commands to connect your rooms with doors
            (join! starting-room "glass"
                   room2 "glass")
-
            (joinn! room2 "wood"
                    room3 "wood")
            ;; Add code here to add things to your rooms
            (new-pesticide "white" starting-room "Talstar pro")
            (new-pesticide "yellow" starting-room "Raid")
            (new-pesticide "green" starting-room "bloom buddy")
+           (new-pesticide "red" room2 "ortho")
+           (new-pesticide "green" room2 "bloom buddy")
+           (new-pesticide "yellow" room2 "Raid")
            (new-bug "red" starting-room "ladybug" "small" "bright")
-           (new-bug "brown" room2 "grasshopper" "medium" "dark")
-           (new-bug "black" starting-room "weta" "big" "bright")
+           (new-bug "black" room2 "weta" "big" "dark")
+           (new-bug "brown" room2 "grasshopper" "big" "dark")
+           (new-bug "white" room3 "aphid" "small" "snowy")
            (new-water "clear" starting-room "Fresh water")
            (new-water "cloudy" starting-room "Salt water")
            (new-fertilizer "blue" starting-room "Inorganic" "Synthetic")
@@ -637,13 +649,33 @@
            (new-bird "orange" starting-room "kind" "hummingbird")
            (new-bird "black" starting-room "angry" "Vulture")
            (new-bird "yellow" starting-room "bubbly" "parrot")
-
-
            (void))))
 
 ;;;
 ;;; PUT YOUR WALKTHROUGHS HERE
 ;;;
+
+(define-walkthrough win
+  (observe (the red bug))
+  (take (the white pesticide))
+  (catch (the red bug))
+  (go (the glass door))
+  (observe (the black bug))
+  (throw (the green pesticide))
+  (throw (the red pesticide))
+  (observe (the brown bug))
+  (use (the yellow pesticide))
+  (mesmerize (the brown bug))
+  (observe (the brown bug))
+  (catch (the brown bug))
+  (drop (the red bug))
+  (go (the wood door))
+  (observe (the white bug))
+  (mesmerize (the white bug))
+  (drop (the white pesticide))
+  (use (the white pesticide))
+  )
+
 
 ;(clean(the green pond))
 ;(drink (the green pond))
