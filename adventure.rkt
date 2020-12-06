@@ -511,6 +511,38 @@
            bird)))
 
 
+;;; TREE
+
+(define-struct (tree thing)
+  (species size)
+
+  #:methods
+  (define (admire tree)
+    (if (string=? (tree-species tree) "Redwood")
+        (display-line "Hyperion is the name of the tallest Redwood tree in the world.")
+        (display-line "This is a normal tree")))
+  
+  (define (hug tree)
+    (if (string=? (tree-species tree) "Redwood")
+        (display-line "Unable to hug tree")
+        (error "This tree is too big to hug"))))
+
+ 
+(define (new-tree adjectives location species size)
+  (local [(define tree
+            (make-tree (string->words adjectives)
+                            '()
+                            location
+                            species
+                            size))]
+    (begin (initialize-thing! tree)
+           tree)))
+
+
+
+
+
+
 ;;;
 ;;; USER COMMANDS
 ;;;
@@ -607,6 +639,9 @@
 (define-user-command (talk)
   "user talks to a bird")
 
+(define-user-command (admire tree) "Looks at tree and admires it")
+
+(define-user-command (hug tree) "Tries to hug tree")
 
 ;;;
 ;;; THE GAME WORLD - FILL ME IN
@@ -649,6 +684,8 @@
            (new-bird "orange" starting-room "kind" "hummingbird")
            (new-bird "black" starting-room "angry" "Vulture")
            (new-bird "yellow" starting-room "bubbly" "parrot")
+           (new-seed "green" starting-room "Cactus" "Big")
+           (new-tree "green" starting-room "Redwood" "Big")
            (void))))
 
 ;;;
