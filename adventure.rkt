@@ -345,7 +345,7 @@
 ;;;; SEEDS
 
 (define-struct (seed thing)
-  (species size)
+  (family length)
   
   #:methods
   (define (prepare-to-move! seed thing)
@@ -353,41 +353,41 @@
 
   (define (study-seed thing)
     (printf "This seed will bloom into a ~A ~A.\n"
-            (seed-size (the seed))
-            (seed-species (the seed)))))
+            (seed-length (the seed))
+            (seed-family (the seed)))))
 
-(define (new-seed adjectives location species size)
+(define (new-seed adjectives location family length)
   (local [(define seed
             (make-seed (string->words adjectives)
                             '()
                             location
-                            species
-                            size))]
+                            family
+                            length))]
     (begin (initialize-thing! seed)
            seed)))
 
 
 ;;;; PLANTS
 (define-struct (plant thing)
-  (species size)
+  (family length)
 
   #:methods
 
   (define (study-plant thing)
     (printf "This plant is a ~A ~A.\n"
-            (plant-size (the plant))
-            (plant-species (the plant))))
+            (plant-length (the plant))
+            (plant-family (the plant))))
   
   (define (prepare-to-move! plant thing)
     (error "You cannot move this plant because the roots are too deep in the soil.")))
 
-(define (new-plant adjectives location species size)
+(define (new-plant adjectives location family length)
   (local [(define plant
             (make-plant (string->words adjectives)
                             '()
                             location
-                            species
-                            size))]
+                            family
+                            length))]
     (begin (initialize-thing! plant)
            plant)))
 
@@ -406,7 +406,7 @@
   (define (spray-seed-w/ thing)
     (if (string=? (water-source thing) "Salt water")
         (display-line "This isn't helping the plant grow")
-        (begin (add! (new-plant "" (here) (seed-species (the seed)) (seed-size (the seed)))
+        (begin (add! (new-plant "" (here) (seed-family (the seed)) (seed-length (the seed)))
                      (display-line "A new plant has bud"))
                (destroy! (the seed))))))
                         
@@ -427,17 +427,17 @@
 
   #:methods
  (define (check-out thing)
-    (if (string=? (fertilizer-chemical thing) "Organic")
+    (if (string=? (fertilizer-chemical thing) "organic")
             (display-line "This fertilizer is organic.")
             (display-line "This fertilzer is inorganic."))) 
 
   (define (spread thing)
-    (if (string=? (fertilizer-chemical thing) "Organic")
+    (if (string=? (fertilizer-chemical thing) "organic")
         (if (string=? (fertilizer-make thing) "Compost")
             (printf "This fertilizer is nourishing the ~A very well!\n"
-                    (plant-species (the plant)))
+                    (plant-family (the plant)))
             (printf "This fertilzer isn't the best choice for the ~A.\n"
-                    (plant-species (the plant))))
+                    (plant-family (the plant))))
         ((begin
     (destroy! (the plant))
     (error "This killed the plant!"))))))
