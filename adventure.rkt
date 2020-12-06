@@ -348,7 +348,12 @@
   
   #:methods
   (define (prepare-to-move! seed thing)
-    (error "You cannot move seeds out of their natural habitat")))
+    (error "You cannot move seeds out of their natural habitat"))
+
+  (define (study-seed thing)
+    (printf "This seed will bloom into a ~A ~A.\n"
+            (seed-size (the seed))
+            (seed-species (the seed)))))
 
 (define (new-seed adjectives location species size)
   (local [(define seed
@@ -375,7 +380,7 @@
             (plant-species (the plant))))
   
   (define (prepare-to-move! plant thing)
-    (error "You cannot move this plant because that will kill it.")))
+    (error "You cannot move this plant because the roots are too deep in the soil.")))
 
 (define (new-plant adjectives location species size)
   (local [(define plant
@@ -396,7 +401,7 @@
 
   (define (spray thing)
     (if (string=? (water-source thing) "Fresh water")
-        (display-line "The plant loves this water and is now blossoming!")
+        (display-line "The plant loves this water and is now growing!")
         (display-line "You are dehydrating the plant, give it fresh water!")))
 
   (define (spray-seed-w/ thing)
@@ -528,6 +533,8 @@
 
 (define-user-command (use pesticide) "kills the bug")
 
+(define-user-command (study-seed thing) "tells you what type of plant the seed will bloom into")
+
 (define-user-command (study-plant thing) "tells you what type of plant it is")
 
 (define-user-command (spray thing) "sprays water on the plant and only works on plants")
@@ -537,10 +544,6 @@
 (define-user-command (check-out thing) "tells you whether the fertilizer is organic or inorganic")
 
 (define-user-command (spread thing) "fertilizes the plant, therefore it will only work if there is a plant")
-
-
-
-
 
 
 
@@ -561,7 +564,6 @@
            ;; Add join commands to connect your rooms with doors
            (join! starting-room "glass"
                   room2 "glass")
-
            (joinn! room2 "wood"
                    room3 "wood")
            ;; Add code here to add things to your rooms
@@ -574,19 +576,40 @@
            (new-water "clear" starting-room "Fresh water")
            (new-water "cloudy" starting-room "Salt water")
            (new-fertilizer "blue" starting-room "Inorganic" "Synthetic")
-           (new-fertilizer "brown" starting-room "Organic" "Compost")
-           (new-fertilizer "red" starting-room "Organic" "Blood meal")
-           (new-fertilizer "tan" starting-room "Organic" "Bone meal")
-           (new-seed "green" starting-room "Cactus" "Big")
-           (new-seed "red" room2 "Rose" "Small")
-           (new-seed "pink" room3 "Lotus" "Small")
+           (new-fertilizer "brown" starting-room "organic" "Compost")
+           (new-fertilizer "red" starting-room "organic" "Blood meal")
+           (new-fertilizer "tan" starting-room "organic" "Bone meal")
+           (new-seed "green" starting-room "cactus" "big")
+           (new-seed "red" room2 "rose" "small")
+           (new-seed "pink" room3 "lotus" "small")
            (void))))
 
 ;;;
 ;;; PUT YOUR WALKTHROUGHS HERE
 ;;;
 
-
+(define-walkthrough win
+  (check-out (the red fertilizer))
+  (check-out (the tan fertilizer))
+  (check-out (the brown fertilizer))
+  (check-out (the blue fertilizer))
+  (take (the red fertilizer))
+  (take (the tan fertilizer))
+  (take (the brown fertilizer))
+  (take (the blue fertilizer))
+  (take (the clear water))
+  (take (the cloudy water))
+  (study-seed (the seed))
+  (spray-seed-w/ (the cloudy water))
+  (spray-seed-w/ (the clear water))
+  (study-plant (the plant))
+  (spray (the clear water))
+  (spray (the cloudy water))
+  (spread (the tan fertilizer))
+  (spread (the brown fertilizer))
+  (spread (the red fertilizer))
+  (spread (the blue fertilizer)))
+  
 
 
 
