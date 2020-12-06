@@ -720,7 +720,6 @@
            (new-bird "orange" starting-room "kind" "hummingbird")
            (new-bird "black" room2 "angry" "Vulture")
            (new-bird "yellow" room3 "bubbly" "parrot")
-           (new-seed "green" starting-room "Cactus" "Big")
            (new-tree "green" starting-room "Redwood" "Big")
            (void))))
 
