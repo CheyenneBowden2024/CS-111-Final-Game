@@ -1,6 +1,7 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
 #reader(lib "htdp-advanced-reader.ss" "lang")((modname adventure) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #t #t none #f () #f)))
+
 (require "adventure-define-struct.rkt")
 (require "macros.rkt")
 (require "utilities.rkt")
@@ -277,7 +278,9 @@
 
 (define-struct (bug thing)
   (species
-   size)
+   size
+   roomloc)
+
 
   #:methods
   (define (observe bug)
@@ -291,24 +294,20 @@
         (begin (display-line "The bug says 'ouch'")
                (move! bug me))))
 
-;  (define (mesmerize bug)
-;    (if (string=? (description me) "dark")
-;        (set! bug-species "ladybug")
-;        (error "There's too much light for the mesmerization")))
-
-  (define (change bug)
-    (begin (destroy! bug)
-           (initialize-thing! bug)))
-  )
+  (define (mesmerize bug)
+    (if (string=? (bug-roomloc bug) "dark")
+        (set-bug-species! bug "ladybug")
+        (error "There's too much light for the mesmerization"))))
          
         
-(define (new-bug adjectives location species size)
+(define (new-bug adjectives location species size roomloc)
   (local [(define bug
             (make-bug (string->words adjectives)
                             '()
                             location
                             species
-                            size))]
+                            size
+                            roomloc))]
     (begin (initialize-thing! bug)
            bug)))
 
@@ -324,12 +323,12 @@
              (display-line "The bugs are now dead!"))
       (error "This pesticide doesn't work")))
 
+
   (define (throw pesticide)
     (if (string=? (pesticide-brand pesticide) "bloom buddy")
         (error "This pesticide is too light to kill the weta")
         (begin (destroy! (the black bug))
                (display-line "The weta gets crushed tragically and vanishes")))))
-
 
 
   
@@ -345,7 +344,11 @@
 ;;;; SEEDS
 
 (define-struct (seed thing)
-  (species size))
+  (species size)
+  
+  #:methods
+  (define (prepare-to-move! seed thing)
+    (error "You cannot move seeds out of their natural habitat")))
 
 (define (new-seed adjectives location species size)
   (local [(define seed
@@ -361,8 +364,18 @@
 
 
 ;;;; PLANTS
-(define-struct (plant seed)
-  ())
+(define-struct (plant thing)
+  (species size)
+
+  #:methods
+
+  (define (study-plant thing)
+    (printf "This plant is a ~A ~A.\n"
+            (plant-size (the plant))
+            (plant-species (the plant))))
+  
+  (define (prepare-to-move! plant thing)
+    (error "You cannot move this plant because that will kill it.")))
 
 (define (new-plant adjectives location species size)
   (local [(define plant
@@ -387,11 +400,11 @@
         (display-line "You are dehydrating the plant, give it fresh water!")))
 
   (define (spray-seed-w/ thing)
-    (if (string=? (water-source thing) "Cloudy water")
+    (if (string=? (water-source thing) "Salt water")
         (display-line "This isn't helping the plant grow")
-        (begin (destroy! (the seed))
-               (add! (new-plant "green" (here) "Cactus" "Big")
-                     (display-line "A new plant has bud"))))))
+        (begin (add! (new-plant "" (here) (seed-species (the seed)) (seed-size (the seed)))
+                     (display-line "A new plant has bud"))
+               (destroy! (the seed))))))
                         
 (define (new-water adjectives location source)
   (local [(define water
@@ -417,8 +430,10 @@
   (define (spread thing)
     (if (string=? (fertilizer-chemical thing) "Organic")
         (if (string=? (fertilizer-make thing) "Compost")
-            (display-line "This fertilizer is nourishing the plant very well!")
-            (display-line "This fertilzer isn't the best choice for the plant."))
+            (printf "This fertilizer is nourishing the ~A very well!\n"
+                    (plant-species (the plant)))
+            (printf "This fertilzer isn't the best choice for the ~A.\n"
+                    (plant-species (the plant))))
         ((begin
     (destroy! (the plant))
     (error "This killed the plant!"))))))
@@ -513,6 +528,22 @@
 
 (define-user-command (use pesticide) "kills the bug")
 
+(define-user-command (study-plant thing) "tells you what type of plant it is")
+
+(define-user-command (spray thing) "sprays water on the plant and only works on plants")
+
+(define-user-command (spray-seed-w/ thing) "sprays water on the seed causing it to bloom and only works for seeds")
+
+(define-user-command (check-out thing) "tells you whether the fertilizer is organic or inorganic")
+
+(define-user-command (spread thing) "fertilizes the plant, therefore it will only work if there is a plant")
+
+
+
+
+
+
+
 ;;;
 ;;; THE GAME WORLD - FILL ME IN
 ;;;
@@ -522,21 +553,24 @@
 (define (start-game)
   ;; Fill this in with the rooms you want
   (local [(define starting-room (new-room "bright"))
+
           (define room2 (new-room "dark"))
-          (define room3 (new-room "light"))]
+          (define room3 (new-room "snowy"))]
+
     (begin (set! me (new-person "" starting-room))
            ;; Add join commands to connect your rooms with doors
            (join! starting-room "glass"
-                  room2 "plastic")
+                  room2 "glass")
+
            (joinn! room2 "wood"
-                   room3 "glass")
+                   room3 "wood")
            ;; Add code here to add things to your rooms
            (new-pesticide "white" starting-room "Talstar pro")
            (new-pesticide "yellow" starting-room "Raid")
            (new-pesticide "green" starting-room "bloom buddy")
-           (new-bug "red" starting-room "ladybug" "small")
-           (new-bug "brown" room2 "grasshopper" "medium")
-           (new-bug "black" starting-room "weta" "big")
+           (new-bug "red" starting-room "ladybug" "small" "bright")
+           (new-bug "brown" room2 "grasshopper" "medium" "dark")
+           (new-bug "black" starting-room "weta" "big" "bright")
            (new-water "clear" starting-room "Fresh water")
            (new-water "cloudy" starting-room "Salt water")
            (new-fertilizer "blue" starting-room "Inorganic" "Synthetic")
@@ -544,6 +578,8 @@
            (new-fertilizer "red" starting-room "Organic" "Blood meal")
            (new-fertilizer "tan" starting-room "Organic" "Bone meal")
            (new-seed "green" starting-room "Cactus" "Big")
+           (new-seed "red" room2 "Rose" "Small")
+           (new-seed "pink" room3 "Lotus" "Small")
            (void))))
 
 ;;;
