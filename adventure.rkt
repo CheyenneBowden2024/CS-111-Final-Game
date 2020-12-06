@@ -135,6 +135,8 @@
   (make-room (string->words adjectives)
              '()))
 
+
+
 ;;;
 ;;; THING
 ;;; Base type for all physical objects that can be inside other objects such as rooms
@@ -200,6 +202,15 @@
                                     '() room2 room1))]
     (begin (initialize-thing! r1->r2)
            (initialize-thing! r2->r1)
+           (void))))
+
+(define (joinn! room2 adjectives2 room3 adjectives3)
+  (local [(define r2->r3 (make-door (string->words adjectives2)
+                                    '() room2 room3))
+          (define r3->r2 (make-door (string->words adjectives3)
+                                    '() room3 room2))]
+    (begin (initialize-thing! r2->r3)
+           (initialize-thing! r3->r2)
            (void))))
 
 ;;;
@@ -268,16 +279,36 @@
   (species
    size)
 
-  ;;#: methods
-  )
+  #:methods
+  (define (observe bug)
+    (if (string=? (bug-species bug) "ladybug")
+        (display-line "It is a friedly bug, let it live")
+        (display-line "KILL THE PEST")))
 
+  (define (catch bug)
+    (if (string=? (bug-size bug) "big")
+        (error "It doesn't fit in your pocket")
+        (begin (display-line "The bug says 'ouch'")
+               (move! bug me))))
+
+;  (define (mesmerize bug)
+;    (if (string=? (description me) "dark")
+;        (set! bug-species "ladybug")
+;        (error "There's too much light for the mesmerization")))
+
+  (define (change bug)
+    (begin (destroy! bug)
+           (initialize-thing! bug)))
+  )
+         
+        
 (define (new-bug adjectives location species size)
   (local [(define bug
             (make-bug (string->words adjectives)
-                      '()
-                      location
-                      species
-                      size))]
+                            '()
+                            location
+                            species
+                            size))]
     (begin (initialize-thing! bug)
            bug)))
 
@@ -287,13 +318,21 @@
   (brand)
 
   #:methods
-  (define (use thing)
-    (if (string=? (pesticide-brand thing) "Talstar pro")
-        (begin (destroy! thing)
-               ;; it also needs to destroy the bug in the room. how?
-               (display-line "The bug is now dead!"))
-        (display-line "This pesticide doesn't work"))))
+  (define (use pesticide)
+   (if (string=? (pesticide-brand pesticide) "Talstar pro")
+      (begin (destroy! pesticide)
+             (display-line "The bugs are now dead!"))
+      (error "This pesticide doesn't work")))
 
+  (define (throw pesticide)
+    (if (string=? (pesticide-brand pesticide) "bloom buddy")
+        (error "This pesticide is too light to kill the weta")
+        (begin (destroy! (the black bug))
+               (display-line "The weta gets crushed tragically and vanishes")))))
+
+
+
+  
 (define (new-pesticide adjectives location brand)
   (local [(define pesticide
             (make-pesticide (string->words adjectives)
@@ -302,7 +341,7 @@
                             brand))]
     (begin (initialize-thing! pesticide)
            pesticide)))
-
+           
 ;;;; SEEDS
 
 (define-struct (seed thing)
@@ -395,8 +434,6 @@
                             make))]
     (begin (initialize-thing! fertilizer)
            fertilizer)))
-        
-             
 
 
 
@@ -470,9 +507,12 @@
 ;;;
 ;;; ADD YOUR COMMANDS HERE!
 ;;;
+(define-user-command (observe bug) "sees if it is a pest")
 
-(define-user-command (pesticide thing) "kills the bug")
-(define-user-command (water thing) "waters the plant")
+(define-user-command (catch bug) "puts the bug in the inventory if it's not big")
+
+(define-user-command (use pesticide) "kills the bug")
+
 ;;;
 ;;; THE GAME WORLD - FILL ME IN
 ;;;
@@ -482,15 +522,21 @@
 (define (start-game)
   ;; Fill this in with the rooms you want
   (local [(define starting-room (new-room "bright"))
-          (define room2 (new-room "dark"))]
+          (define room2 (new-room "dark"))
+          (define room3 (new-room "light"))]
     (begin (set! me (new-person "" starting-room))
            ;; Add join commands to connect your rooms with doors
            (join! starting-room "glass"
                   room2 "plastic")
+           (joinn! room2 "wood"
+                   room3 "glass")
            ;; Add code here to add things to your rooms
            (new-pesticide "white" starting-room "Talstar pro")
            (new-pesticide "yellow" starting-room "Raid")
+           (new-pesticide "green" starting-room "bloom buddy")
            (new-bug "red" starting-room "ladybug" "small")
+           (new-bug "brown" room2 "grasshopper" "medium")
+           (new-bug "black" starting-room "weta" "big")
            (new-water "clear" starting-room "Fresh water")
            (new-water "cloudy" starting-room "Salt water")
            (new-fertilizer "blue" starting-room "Inorganic" "Synthetic")
@@ -500,26 +546,12 @@
            (new-seed "green" starting-room "Cactus" "Big")
            (void))))
 
-
-
-
 ;;;
 ;;; PUT YOUR WALKTHROUGHS HERE
 ;;;
 
 
-(define-walkthrough win
-  (check-out (the brown fertilizer))
-  (check-out (the red fertilizer))
-  (check-out (the blue fertilizer))
-  (check-out (the tan fertilizer))
-  (spray (the cloudy water))
-  (spray (the clear water))
-  (spread (the brown fertilizer))
-  (spread (the red fertilizer))
-  (spread (the tan fertilizer))
-  (spread (the blue fertilizer)))
-  
+
 
 
 ;;;
