@@ -345,7 +345,16 @@
 ;;;; SEEDS
 
 (define-struct (seed thing)
-  (species size))
+  (species size)
+  
+  #:methods
+  (define (prepare-to-move! seed thing)
+    (error "You cannot move seeds out of their natural habitat"))
+
+  (define (study-seed thing)
+    (printf "This seed will bloom into a ~A ~A.\n"
+            (seed-size (the seed))
+            (seed-species (the seed)))))
 
 (define (new-seed adjectives location species size)
   (local [(define seed
@@ -357,12 +366,20 @@
     (begin (initialize-thing! seed)
            seed)))
 
-        
-
 
 ;;;; PLANTS
-(define-struct (plant seed)
-  ())
+(define-struct (plant thing)
+  (species size)
+
+  #:methods
+
+  (define (study-plant thing)
+    (printf "This plant is a ~A ~A.\n"
+            (plant-size (the plant))
+            (plant-species (the plant))))
+  
+  (define (prepare-to-move! plant thing)
+    (error "You cannot move this plant because the roots are too deep in the soil.")))
 
 (define (new-plant adjectives location species size)
   (local [(define plant
@@ -383,15 +400,15 @@
 
   (define (spray thing)
     (if (string=? (water-source thing) "Fresh water")
-        (display-line "The plant loves this water and is now blossoming!")
+        (display-line "The plant loves this water and is now growing!")
         (display-line "You are dehydrating the plant, give it fresh water!")))
 
   (define (spray-seed-w/ thing)
-    (if (string=? (water-source thing) "Cloudy water")
+    (if (string=? (water-source thing) "Salt water")
         (display-line "This isn't helping the plant grow")
-        (begin (destroy! (the seed))
-               (add! (new-plant "green" (here) "Cactus" "Big")
-                     (display-line "A new plant has bud"))))))
+        (begin (add! (new-plant "" (here) (seed-species (the seed)) (seed-size (the seed)))
+                     (display-line "A new plant has bud"))
+               (destroy! (the seed))))))
                         
 (define (new-water adjectives location source)
   (local [(define water
@@ -417,8 +434,10 @@
   (define (spread thing)
     (if (string=? (fertilizer-chemical thing) "Organic")
         (if (string=? (fertilizer-make thing) "Compost")
-            (display-line "This fertilizer is nourishing the plant very well!")
-            (display-line "This fertilzer isn't the best choice for the plant."))
+            (printf "This fertilizer is nourishing the ~A very well!\n"
+                    (plant-species (the plant)))
+            (printf "This fertilzer isn't the best choice for the ~A.\n"
+                    (plant-species (the plant))))
         ((begin
     (destroy! (the plant))
     (error "This killed the plant!"))))))
@@ -434,6 +453,9 @@
                             make))]
     (begin (initialize-thing! fertilizer)
            fertilizer)))
+
+
+;;; POND
 
 (define-struct (pond thing)
   (size
@@ -643,6 +665,18 @@
 
 (define-user-command (hug tree) "Tries to hug tree")
 
+(define-user-command (study-seed thing) "tells you what type of plant the seed will bloom into")
+
+(define-user-command (study-plant thing) "tells you what type of plant it is")
+
+(define-user-command (spray thing) "sprays water on the plant and only works on plants")
+
+(define-user-command (spray-seed-w/ thing) "sprays water on the seed causing it to bloom and only works for seeds")
+
+(define-user-command (check-out thing) "tells you whether the fertilizer is organic or inorganic")
+
+(define-user-command (spread thing) "fertilizes the plant, therefore it will only work if there is a plant")
+
 ;;;
 ;;; THE GAME WORLD - FILL ME IN
 ;;;
@@ -674,11 +708,13 @@
            (new-bug "white" room3 "aphid" "small" "snowy")
            (new-water "clear" starting-room "Fresh water")
            (new-water "cloudy" starting-room "Salt water")
-           (new-fertilizer "blue" starting-room "Inorganic" "Synthetic")
-           (new-fertilizer "brown" starting-room "Organic" "Compost")
-           (new-fertilizer "red" starting-room "Organic" "Blood meal")
-           (new-fertilizer "tan" starting-room "Organic" "Bone meal")
-           (new-seed "green" starting-room "Cactus" "Big")
+           (new-fertilizer "blue" starting-room "inorganic" "Synthetic")
+           (new-fertilizer "brown" starting-room "organic" "Compost")
+           (new-fertilizer "red" starting-room "organic" "Blood meal")
+           (new-fertilizer "tan" starting-room "organic" "Bone meal")
+           (new-seed "green" starting-room "cactus" "big")
+           (new-seed "red" room2 "rose" "small")
+           (new-seed "pink" room3 "lotus" "small")
            (new-pond "blue" starting-room "large" "clean")
            (new-pond "green" starting-room "polluted" "infested")
            (new-bird "orange" starting-room "kind" "hummingbird")
@@ -713,6 +749,28 @@
   (use (the white pesticide))
   )
 
+
+;(define-walkthrough try
+;  (check-out (the red fertilizer))
+;  (check-out (the tan fertilizer))
+;  (check-out (the brown fertilizer))
+;  (check-out (the blue fertilizer))
+;  (take (the red fertilizer))
+;  (take (the tan fertilizer))
+;  (take (the brown fertilizer))
+;  (take (the blue fertilizer))
+;  (take (the clear water))
+;  (take (the cloudy water))
+;  (study-seed (the seed))
+;  (spray-seed-w/ (the cloudy water))
+;  (spray-seed-w/ (the clear water))
+;  (study-plant (the plant))
+;  (spray (the clear water))
+;  (spray (the cloudy water))
+;  (spread (the tan fertilizer))
+;  (spread (the brown fertilizer))
+;  (spread (the red fertilizer))
+;  (spread (the blue fertilizer)))
 
 ;(clean(the green pond))
 ;(drink (the green pond))
