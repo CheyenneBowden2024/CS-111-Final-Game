@@ -427,12 +427,12 @@
 
   #:methods
  (define (check-out thing)
-    (if (string=? (fertilizer-chemical thing) "Organic")
+    (if (string=? (fertilizer-chemical thing) "organic")
             (display-line "This fertilizer is organic.")
             (display-line "This fertilzer is inorganic."))) 
 
   (define (spread thing)
-    (if (string=? (fertilizer-chemical thing) "Organic")
+    (if (string=? (fertilizer-chemical thing) "organic")
         (if (string=? (fertilizer-make thing) "Compost")
             (printf "This fertilizer is nourishing the ~A very well!\n"
                     (plant-species (the plant)))
