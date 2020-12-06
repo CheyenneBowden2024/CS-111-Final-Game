@@ -458,10 +458,28 @@
 ;;; POND
 
 (define-struct (pond thing)
-  (size
+  (depth
    state)
     
   #:methods
+  
+  
+  ; add water
+  (define (fill pond)
+    (if (string=? (pond-depth pond) "shallow")
+        (begin
+          (set-pond-depth! pond "deep")
+          (display-line "the pond is now deep enough to swim in!"))
+                  (display-line "You dont need to fill this!")
+))
+
+    ; swim
+  (define (swim pond)
+    (if (string=? (pond-depth pond) "shallow")
+        (error "this is not deep enough to swim in. FILL pond")
+            (if (string=? (pond-state pond) "infested")
+                (error" this pond is infested!You cant swim in here. Clean the pond")
+                (display-line "THAT WAS SO FUN!"))))
   ;; clean
   (define (clean pond)
     (if (string=? (pond-state pond) "infested")
@@ -658,6 +676,10 @@
 
 (define-user-command (talk)
   "user talks to a bird")
+  
+  (define-user-command (fill pond) "fills the pond with more water")
+    
+  (define-user-command (swim pond) "user swims in the pond")
 
 (define-user-command (admire tree) "Looks at tree and admires it")
 
@@ -713,8 +735,8 @@
            (new-seed "green" starting-room "cactus" "big")
            (new-seed "red" room2 "rose" "small")
            (new-seed "pink" room3 "lotus" "small")
-           (new-pond "blue" room2"large" "clean")
-           (new-pond "green" starting-room "polluted" "infested")
+           (new-pond "blue" room2 "shallow" "clean")
+           (new-pond "green" starting-room "deep" "infested")
            (new-bird "orange" starting-room "kind" "hummingbird")
            (new-bird "black" room2 "malicious" "Vulture")
            (new-bird "yellow" room3 "kind" "parrot")
@@ -765,6 +787,8 @@
   (spread (the brown fertilizer))
   (talk(the black bird))
   (hit(the black bird))
+  (fill(the blue pond))
+  (swim(the blue pond))
   
   (go (the wood door))
   (observe (the white bug))
