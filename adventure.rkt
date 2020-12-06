@@ -767,7 +767,7 @@
   (mesmerize (the white bug))
   (drop (the white pesticide))
   (use (the white pesticide))
-  (study-seed (the seed)
+  (study-seed (the seed))
   (spray-seed-w/ (the clear water))
   (study-plant (the plant))
   (spray (the clear water))
