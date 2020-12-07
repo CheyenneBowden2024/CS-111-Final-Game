@@ -770,6 +770,7 @@
   (clean(the green pond))
   (drink (the green pond))
   (talk(the orange bird))
+  (hit(the orange bird))
   
   (go (the glass door))
   (observe (the black bug))
